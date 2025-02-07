@@ -1,0 +1,24 @@
+msgid "# NAME"
+msgstr "# NAME"
+
+msgid "0.0.0-prealpha"
+msgstr "0.0.0-Prealpha"
+
+msgid "# DESCRIPTION"
+msgstr "# Description"
+
+msgid "## annotation"
+msgstr "## Annotation"
+
+msgid "# SUBROUTINES/METHODS"
+msgstr "# Subrautines/Methods"
+
+msgid "## scan_project (@lib)"
+msgstr "## Scan_Project (@lib)"
+
+msgid "# AUTHOR"
+msgstr "# Author"
+
+msgid "Yaroslav O. Kosmina <dart@cpan.org>"
+msgstr "Yaroslav O. kosmina <dart@cpan.org>"
+

@@ -1,0 +1,5 @@
+#!/usr/bin/perl
+
+use Aion::Annotation;
+
+Aion::Annotation->project_scan

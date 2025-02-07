@@ -11,3 +11,13 @@ on 'test' => sub {
 };
 
 requires 'common::sense', '3.75';
+requires 'config', '0';
+requires 'diagnostics', '0';
+requires 'feature', '0';
+requires 'strict', '0';
+requires 'warnings', '1.70';
+requires 'Aion', '0';
+requires 'Aion::Annotation', '0';
+requires 'Aion::Fs', '0';
+requires 'PerlIO', '0';
+requires 'PerlIO::scalar', '0';
