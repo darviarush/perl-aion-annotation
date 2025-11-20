@@ -5,113 +5,175 @@ use common::sense;
 
 our $VERSION = "0.0.0-prealpha";
 
-use Aion::Fs qw/find/;
+# Дефолтный путь для сканирования
+use config LIB => ['lib'];
 
-# Обработчики аннотаций
-use config ON => {};
+# Директория в которую складывать файлы конфигурации
+use config INI => 'etc/annotation';
 
-# Обработчик на конец обработки каждого модуля
-use config ON_END_MODULE => undef;
-
-# Обработчик на конец обработки всех директорий
-use config ON_END => undef;
+use Aion::Fs qw/find erase mkpath mtime to_pkg/;
+use POSIX qw/strftime/;
+use Time::Local qw/timelocal/;
 
 use Aion;
 
-# Путь к файлу
-has path => (is => 'ro', isa => Str);
+# Кодовая база для сканирования
+has lib => (is => 'ro', isa => ArrayRef[Str], default => LIB);
 
-# Хеш: определение => { annotations => [ [АННОТАЦИЯ => аргументы], ...], type => 'sub|has', remark => '...' }
-has annotation => (is => 'ro', isa => Hash[Dict[
-	annotations => ArrayRef[ArrayRef[Str]],
-	name => Str,
-	type => Enum[qw/sub has/],
-	remark => MayBe[Str],
-	pkg => Str,
-]]);
+# Директория куда сохранять файлы аннотаций
+has ini => (is => 'ro', isa => Str, default => INI);
 
+# Просто считать аннотации
+has force => (is => 'ro', isa => Bool, default => 0);
 
-# Сканирует файл и достаёт все аннотации и комментарии
+# Аннотации: annotation_name.pkg.sub_or_has_name => annotation_desc
+has ann => (is => 'ro', isa => HashRef[HashRef[HashRef[Str]]], default => sub {
+	my $self = shift;
+	my %ann;
+	return \%ann if $self->force;
+
+	return \%ann if !-d(my $ini = $self->ini);
+
+	while(<$ini/*.ann>) {
+		my $path = $_;
+		my $annotation_name = path()->{name};
+		open my $f, "<:utf8", $_ or do { warn "$_ not opened: $!"; next };
+		while(<$f>) {
+			warn "$path corrupt on line $.!" unless /^([\w:]+)#(\w*)=(.*)$/;
+			$ann{$annotation_name}{$1}{$2} = $3;
+		}
+		close $f;
+	}
+
+	\%ann
+});
+
+# Путь к файлу с комментариями
+has remark_path => (is => 'ro', isa => Str, default => sub { my $self = shift; $self->ini . "/remarks.ini" });
+
+# Комментарии: pkg.sub_or_has_name => remarks
+has remark => (is => 'ro', isa => HashRef[HashRef[ArrayRef[Str]]], default => sub {
+	my ($self) = @_;
+	my %remark;
+	return \%remark if $self->force;
+
+	my $remark_path = $self->remark_path;
+	return \%remark if !-e $remark_path;
+
+	open my $f, "<:utf8", $remark_path or do { warn "$remark_path not opened: $!"; return \%remark };
+	while(<$f>) {
+		warn "$remark_path corrupt on line $.!" unless /^([\w:]+)#(\w*)=(.*)$/;
+		$remark{$1}{$2} = [map { s/\\(.)/$1/gr } split /\\n/, $3];
+	}
+	close $f;
+
+	\%remark
+});
+
+# Путь к файлу с временем последнего доступа к модулям
+has modules_mtime_path => (is => 'ro', isa => Str, default => sub { my $self = shift; $self->ini . "/modules.mtime.ini" });
+
+# Время последнего доступа к модулям: pkg => unixtime
+has modules_mtime => (is => 'ro', isa => HashRef[Int], default => sub {
+	my ($self) = @_;
+
+	my %mtime;
+	return \%mtime if $self->force;
+
+	my $mtime_path = $self->modules_mtime_path;
+	return \%mtime if !-e $mtime_path;
+
+	open my $f, "<:utf8", $mtime_path or do { warn "$mtime_path not opened: $!"; return 0 };
+	while(<$f>) {
+		warn "$mtime_path corrupt on line $.!" unless /^(?<module>[\w:]+)=(?<year>\d{4})-(?<mon>\d{2})-(?<mday>\d{2}) (?<hour>\d{2}):(?<min>\d{2}):(?<sec>\d{2})$/;
+		$mtime{$+{module}} = [0, timelocal($+{sec}, $+{min}, $+{hour}, $+{mday}, $+{mon} - 1, $+{year})];
+	}
+	close $f;
+
+	\%mtime
+});
+
+# Сканирует модули и сохраняет аннотации
 sub scan {
 	my ($self) = @_;
 
-	open my $f, "<:utf8", $self->{path} or die "$self->{path}: $!";
+	my $libs = $self->lib;
+	s/\/$// for @$libs;
+
+	my $modules_mtime = $self->modules_mtime;
+	my $ann = $self->ann;
+	my $remark = $self->remark;
 	
-	my $pkg = 'main'; my @ann; my @rem;
-	while(<$f>) {
-		push @ann, [$1, $2] if /^#\@(\S+)\s*(.*?)\s*$/;
-		push @rem, $_ if /^#\s/;
-		$pkg = $1 if /^package\s+([a-zA-Z_]\w*(?:::[a-zA-Z_]\w*)*)\s*;/a;
-		@rem = @ann = () if /^\}/;
-		$self->{annotation}{$2} = {
-			annotations => [@ann],
-			pkg => $pkg,
-			name => $2,
-			type => $1,
-			remark => scalar @rem? join("", map s/^#\s//, @rem): undef,
-		}, @rem = %ann = () if /^(sub|has)\s+(\w+)/;
+	for my $lib (@$libs) {
+		my $iter = find $lib, "*.pm", "-f";
+		while(<$iter>) {
+			my $pkg = to_pkg(substr $_, 1 + length $lib);
+			my $mtime = int mtime;
+			next if !$self->force && exists $modules_mtime->{$pkg} && $modules_mtime->{$pkg} == $mtime;
+			$modules_mtime->{$pkg} = $mtime;
+
+			delete $_->{$pkg} for values %$ann;
+			delete $remark->{$pkg};
+
+			open my $f, "<:utf8", $_ or do { warn "$_ not opened: $!"; next };
+			my @ann; my @rem;
+			my $save_annotation = sub {
+				my ($name) = @_;
+				$ann->{$_->[0]}{$pkg}{$name} = $_->[1] for @ann;
+				$remark->{$pkg}{$name} = [@rem] if @rem;
+				@ann = @rem = ();
+			};
+			while(<$f>) {
+				last if /^(__END__|__DATA__)\s*$/;
+				push @ann, [$1, $2] if /^#\@(\w+)\s+(.*?)\s*$/;
+				push @rem, $1 if /^#\s(.*?)\s*$/;
+				$save_annotation->() if /^\s*$/ && (0+@ann || 0+@rem);
+				$save_annotation->($1) if /^sub\s+(\w+)/;
+				$save_annotation->($+{s}) if /^has \s+ (?: (?<s>\w+) | '(?<s>(\\'|[^'])*)' | "(?<s>(\\"|[^"])*)" )/x;
+			}
+			$save_annotation->();
+			close $f;
+		}
+	}
+
+	mkpath($self->ini . "/");
+
+	# Сохраням аннотации и удаляем файлы с аннотациями, которых уже нет в проекте
+	for my $annotation_name (sort keys %$ann) {
+		my $pkgs = $ann->{$annotation_name};
+		my $path = $self->ini . "/$annotation_name.ann";
+		unlink($path), next if !keys %$pkgs;
+		open my $f, ">:utf8", $path or do { warn "$path not writed: $!" };
+		for my $pkg (sort keys %$pkgs) {
+			my $subs = $pkgs->{$pkg};
+			for my $sub (sort keys %$subs) {
+				my $annotation = $subs->{$sub};
+				print $f "$pkg#$sub=$annotation\n";
+			}
+		}
+		close $f;
 	}
 	
+	# Сохраняем время последнего изменения файлов
+	my $mtime_path = $self->modules_mtime_path;
+
+	open my $f, ">:utf8", $mtime_path or do { warn "$mtime_path not writed: $!" };
+	printf $f "%s=%s\n", $_, strftime('%Y-%m-%d %H:%M:%S', localtime $modules_mtime->{$_}) for sort grep { $modules_mtime->{$_} } keys %$modules_mtime;
+	close $f;
+
+	# Сохраняем комментарии
+	my $remark_path = $self->remark_path;
+	open my $f, ">:utf8", $remark_path or do { warn "$remark_path not writed: $!" };
+	for my $pkg (sort keys %$remark) {
+		my $subs = $remark->{$pkg};
+		for my $sub (sort keys %$subs) {
+			my $rem = $subs->{$sub};
+			print $f "$pkg#$sub=", join("\\n", @$rem), "\n" if @$rem;
+		}
+	}
 	close $f;
 	
 	$self
-}
-
-# Подгружает процессор и возвращает его функцию
-sub _init_processor {
-	my ($v, $event) = @_;
-	
-	die "$event `$v` - not valid!" unless $v =~ /^([\w:]+)#(\w+)$/a;
-	eval "require $1" or die;
-	my $sub = $v =~ s/#/::/r;
-	die "Annotation processor was not detected! $event `$v`." unless *{$sub}{SUB};
-	\&$sub
-}
-
-# Сканирует каталоги с модулями и вызывает на установленные аннотации обработчики
-sub scan_project {
-	my ($cls, @lib) = @_;
-	
-	@lib = 'lib' unless @lib;
-	
-	my $on_end_module;
-	$on_end_module = _init_processor(ON_END_MODULE, "ON_END_MODULE") if ON_END_MODULE;
-
-	my $on_end;
-	$on_end = _init_processor(ON_END, "ON_END") if ON_END;
-	
-	my %on;
-	
-	# Инициализируем обработчики
-	while (my ($k, $v) = each %{ON()}) {
-		$on{$k} = _init_processor($v, "ON $k =>");
-	}
-	
-	my @ann;
-	my @paths;
-	
-	# Проходимся по модулям
-	find \@lib, "-f", "*.pm", sub {
-		my $annotation_href = Aion::Annotation->new(path => $_)->scan->{annotation};
-		push @ann, $annotation_href;
-		
-		for my $name (keys %$annotation_href) {
-			my $ann = $annotation_href->{$name};
-			
-			my $annotations = $ann->{annotations};
-			for $annotation (@$annotations) {
-				my ($k, $attr) = @$annotation;
-				$on{$k}->($ann, $attr) if exists $on{$k};
-			}
-		}
-		
-		$on_end_module->($annotation_href, $_) if $on_end_module;
-		push @paths, $path;
-	0 };
-	
-	$on_end->(\@ann, \@paths) if $on_end;
-	
-	$cls
 }
 
 1;
@@ -122,69 +184,28 @@ __END__
 
 =head1 NAME
 
-Aion::Annotation - обрабатывает аннотации в модулях perl
+Aion :: annotation - processes annotations in perl modules
 
 =head1 VERSION
 
-0.0.0-Prealpha
+0.0.0-prealpha
 
 =head1 SYNOPSIS
 
-Файл lib/For/Test.pm:
+Lib/For/Test.pm file:
 
 	package For::Test;
-	
-	#@TODO add1
-	# Is property
-	has abc => (is => 'ro');
-	
-	# Is method
-	
-	#@TODO add2
+	# The package for testing
+	#@deprecated for_test
 	
 	#@deprecated
+	#@todo add1
+	# Is property
+	#   readonly
+	has abc => (is => 'ro');
 	
-	#   and subroutine
+	#@todo add2
 	sub xyz {}
-	
-	sub any {}
-	
-	1;
-
-Файл .config:
-
-	config Aion::Annotation => (
-		ON => {
-			deprecated => 'My#on_deprecated',
-			DOTO => 'My#on_todo',
-		},
-		ON_END_MODULE => 'My#on_end_module',
-		ON_END => 'My#on_end'
-	);
-
-Файл lib/My.pm:
-
-	package My;
-	
-	sub on_deprecated {
-		my ($ann, $attr) = @_;
-		push our @deprecated, "* $ann->{name} ($ann->{type}) in $ann->{pkg}: $ann->{remark}";
-	}
-	
-	sub on_todo {
-		my ($ann, $attr) = @_;
-		push our @todo, "* $ann->{name} - $attr";
-	}
-	
-	sub on_end_module {
-		my ($annotation_href, $path) = @_;
-		push our @list_modules, "* $path\n";
-	}
-	
-	sub on_end {
-		my ($annotations, $paths) = @_;
-		our $count_entities = @$annotations;
-	}
 	
 	1;
 
@@ -192,88 +213,51 @@ Aion::Annotation - обрабатывает аннотации в модулях
 
 	use Aion::Annotation;
 	
-	Aion::Annotation->scan_project;
+	Aion::Annotation->new->scan;
 	
+	open my $f, '<', 'etc/annotation/modules.mtime.ini' or die $!; my @modules_mtime = <$f>; chop for @modules_mtime; close $f;
+	open my $f, '<', 'etc/annotation/remarks.ini' or die $!; my @remarks = <$f>; chop for @remarks; close $f;
+	open my $f, '<', 'etc/annotation/todo.ann' or die $!; my @todo = <$f>; chop for @todo; close $f;
+	open my $f, '<', 'etc/annotation/deprecated.ann' or die $!; my @deprecated = <$f>; chop for @deprecated; close $f;
 	
-	my $deprecated = ['* xyz (sub) in My: Is method
-	  and subroutine
-	'];
+	use DDP; p @modules_mtime;
 	
-	\@My::deprecated  # --> $deprecated
-	
-	
-	my $todo = [
-		"* abc - add1",
-		"* xyz - add2",
-	];
-	
-	\@My::todo  # --> $todo
-	
-	
-	my $list_modules = [
-		'* lib/My.pm',
-		'* lib/My.pm',
-		'* lib/My.pm',
-	];
-	
-	\@My::list_modules  # --> $list_modules
-	
-	
-	$My::count_entities  # -> 3
+	0+@modules_mtime  # -> 1
+	$modules_mtime[0] # ~> ^For::Test=\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d$
+	\@remarks          # --> ['For::Test#=The package for testing', 'For::Test#abc=Is property\n  readonly']
+	\@todo             # --> ['For::Test#abc=add1', 'For::Test#xyz=add2']
+	\@deprecated       # --> ['For::Test#=for_test', 'For::Test#abc=']
 
-=head1 Description
+=head1 DESCRIPTION
 
-Aion::Annotation — .
+C<Aion::Annotation> scans the perl modules in the B<lib> directory and prints them to the corresponding files in the B<etc/annotation> directory.
 
-=head1 FEATURES
+You can change B<lib> through the C<LIB> config, and B<etc/annotation> through the C<INI> config.
 
-=head2 path
+=over
 
-Путь к файлу у которого нужно считать аннотации.
+=item 1. B<modules.mtime.ini> stores the times of the last module update.
 
-	my $aion_annotation = Aion::Annotation->new(path => 'lib/My.pm');
-	
-	$aion_annotation->path	# => lib/My.pm
+=item 2. B<remarks.ini> stores comments for routines, properties and packages.
 
-=head2 Annotation
+=item 3. The B<name.ann> files save annotations by their names.
 
-Хеш всех свойств и подпрограмм в файле с их аннотациями и комментариями.
+=back
 
-	my $aion_annotation = Aion::Annotation->new(path => 'lib/My.pm')->scan;
-	
-	my $annotation = {
-	};
-	
-	$aion_annotation->annotation	# --> $annotation
-
-=head1 Subrautines/Methods
+=head1 SUBROUTINES/METHODS
 
 =head2 scan ()
 
-Сканирует файл и достаёт все аннотации и комментарии.
+Scans the codebase specified by the C<LIB> config (list of directories, default C<["lib"]>). And it takes out all the annotations and comments and prints them into the corresponding files in the C<INI> directory (by default "etc/annotation").
 
-	my $aion_annotation = Aion::Annotation->new(path => 'lib/My.pm')->scan;
-	keys %{ $aion_annotation->annotation }  # -> 3
+=head1 AUTHOR
 
-=head2 Scan_Project (@lib)
-
-Сканирует каталоги с модулями и вызывает на установленные аннотации обработчики.
-
-	undef $My::count_entities;
-	
-	Aion::Annotation->scan_project("lib");
-	
-	$My::count_entities # -> 3
-
-=head1 Author
-
-Yaroslav O. kosmina L<mailto:dart@cpan.org>
+Yaroslav O. Kosmina L<mailto:dart@cpan.org>
 
 =head1 LICENSE
 
-⚖ B<GPLv3>
+⚖ I<* gplv3 *>
 
 =head1 COPYRIGHT
 
-The Aion::Annotation module is copyright © 2025 Yaroslav O. Kosmina. Rusland. All rights reserved.
-
+The Aion :: annotation module is copyright © 2025 Yaroslav O. Kosmina. Rusland. All Rights Reserved.

@@ -12,60 +12,17 @@ Aion::Annotation - обрабатывает аннотации в модулях
 Файл lib/For/Test.pm:
 ```perl
 package For::Test;
-
-#@TODO add1
-# Is property
-has abc => (is => 'ro');
-
-# Is method
-
-#@TODO add2
+# The package for testing
+#@deprecated for_test
 
 #@deprecated
+#@todo add1
+# Is property
+#   readonly
+has abc => (is => 'ro');
 
-#   and subroutine
+#@todo add2
 sub xyz {}
-
-sub any {}
-
-1;
-```
-
-Файл .config:
-```perl
-config Aion::Annotation => (
-	ON => {
-		deprecated => 'My#on_deprecated',
-		DOTO => 'My#on_todo',
-	},
-	ON_END_MODULE => 'My#on_end_module',
-	ON_END => 'My#on_end'
-);
-```
-
-Файл lib/My.pm:
-```perl
-package My;
-
-sub on_deprecated {
-	my ($ann, $attr) = @_;
-	push our @deprecated, "* $ann->{name} ($ann->{type}) in $ann->{pkg}: $ann->{remark}";
-}
-
-sub on_todo {
-	my ($ann, $attr) = @_;
-	push our @todo, "* $ann->{name} - $attr";
-}
-
-sub on_end_module {
-	my ($annotation_href, $path) = @_;
-	push our @list_modules, "* $path\n";
-}
-
-sub on_end {
-	my ($annotations, $paths) = @_;
-	our $count_entities = @$annotations;
-}
 
 1;
 ```
@@ -73,87 +30,35 @@ sub on_end {
 ```perl
 use Aion::Annotation;
 
-Aion::Annotation->scan_project;
+Aion::Annotation->new->scan;
 
+open my $f, '<', 'etc/annotation/modules.mtime.ini' or die $!; my @modules_mtime = <$f>; chop for @modules_mtime; close $f;
+open my $f, '<', 'etc/annotation/remarks.ini' or die $!; my @remarks = <$f>; chop for @remarks; close $f;
+open my $f, '<', 'etc/annotation/todo.ann' or die $!; my @todo = <$f>; chop for @todo; close $f;
+open my $f, '<', 'etc/annotation/deprecated.ann' or die $!; my @deprecated = <$f>; chop for @deprecated; close $f;
 
-my $deprecated = ['* xyz (sub) in My: Is method
-  and subroutine
-'];
-
-\@My::deprecated  # --> $deprecated
-
-
-my $todo = [
-	"* abc - add1",
-	"* xyz - add2",
-];
-
-\@My::todo  # --> $todo
-
-
-my $list_modules = [
-	'* lib/My.pm',
-	'* lib/My.pm',
-	'* lib/My.pm',
-];
-
-\@My::list_modules  # --> $list_modules
-
-
-$My::count_entities  # -> 3
+0+@modules_mtime  # -> 1
+$modules_mtime[0] # ~> ^For::Test=\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d$
+\@remarks          # --> ['For::Test#=The package for testing', 'For::Test#abc=Is property\n  readonly']
+\@todo             # --> ['For::Test#abc=add1', 'For::Test#xyz=add2']
+\@deprecated       # --> ['For::Test#=for_test', 'For::Test#abc=']
 ```
 
 # DESCRIPTION
 
-Aion::Annotation — .
+`Aion::Annotation` сканирует модули perl в каталоге **lib** и распечатывает их в соответстующие файлы в каталоге **etc/annotation**.
 
-# FEATURES
+Сменить **lib** можно через конфиг `LIB`, а **etc/annotation** через конфиг `INI`.
 
-## path
-
-Путь к файлу у которого нужно считать аннотации.
-
-```perl
-my $aion_annotation = Aion::Annotation->new(path => 'lib/My.pm');
-
-$aion_annotation->path	# => lib/My.pm
-```
-
-## annotation
-
-Хеш всех свойств и подпрограмм в файле с их аннотациями и комментариями.
-
-```perl
-my $aion_annotation = Aion::Annotation->new(path => 'lib/My.pm')->scan;
-
-my $annotation = {
-};
-
-$aion_annotation->annotation	# --> $annotation
-```
+1. В **modules.mtime.ini** хранятся времена последнего обновления модулей.
+2. В **remarks.ini** сохраняются комментарии к подпрограммам, свойствам и пакетам.
+3. В файлах **имя.ann** сохраняются аннотации по своим именам.
 
 # SUBROUTINES/METHODS
 
 ## scan ()
 
-Сканирует файл и достаёт все аннотации и комментарии.
-
-```perl
-my $aion_annotation = Aion::Annotation->new(path => 'lib/My.pm')->scan;
-keys %{ $aion_annotation->annotation }  # -> 3
-```
-
-## scan_project (@lib)
-
-Сканирует каталоги с модулями и вызывает на установленные аннотации обработчики.
-
-```perl
-undef $My::count_entities;
-
-Aion::Annotation->scan_project("lib");
-
-$My::count_entities # -> 3
-```
+Сканирует кодовую базу задаваемую конфигом `LIB` (перечень каталогов, по умолчанию `["lib"]`). И достаёт все аннотации и комментарии и распечатывает их в соответстующие файлы в каталоге `INI` (по умолчанию "etc/annotation").
 
 # AUTHOR
 
