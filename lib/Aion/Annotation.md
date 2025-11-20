@@ -39,9 +39,9 @@ open my $f, '<', 'etc/annotation/deprecated.ann' or die $!; my @deprecated = <$f
 
 0+@modules_mtime  # -> 1
 $modules_mtime[0] # ~> ^For::Test=\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d$
-\@remarks          # --> ['For::Test#=The package for testing', 'For::Test#abc=Is property\n  readonly']
-\@todo             # --> ['For::Test#abc=add1', 'For::Test#xyz=add2']
-\@deprecated       # --> ['For::Test#=for_test', 'For::Test#abc=']
+\@remarks         # --> ['For::Test#=The package for testing', 'For::Test#abc=Is property\n  readonly']
+\@todo            # --> ['For::Test#abc=add1', 'For::Test#xyz=add2']
+\@deprecated      # --> ['For::Test#=for_test', 'For::Test#abc=']
 ```
 
 # DESCRIPTION

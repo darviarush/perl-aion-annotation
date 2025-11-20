@@ -184,7 +184,7 @@ __END__
 
 =head1 NAME
 
-Aion :: annotation - processes annotations in perl modules
+Aion::Annotation - processes annotations in perl modules
 
 =head1 VERSION
 
@@ -192,7 +192,7 @@ Aion :: annotation - processes annotations in perl modules
 
 =head1 SYNOPSIS
 
-Lib/For/Test.pm file:
+lib/For/Test.pm file:
 
 	package For::Test;
 	# The package for testing
@@ -220,13 +220,11 @@ Lib/For/Test.pm file:
 	open my $f, '<', 'etc/annotation/todo.ann' or die $!; my @todo = <$f>; chop for @todo; close $f;
 	open my $f, '<', 'etc/annotation/deprecated.ann' or die $!; my @deprecated = <$f>; chop for @deprecated; close $f;
 	
-	use DDP; p @modules_mtime;
-	
 	0+@modules_mtime  # -> 1
 	$modules_mtime[0] # ~> ^For::Test=\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d$
-	\@remarks          # --> ['For::Test#=The package for testing', 'For::Test#abc=Is property\n  readonly']
-	\@todo             # --> ['For::Test#abc=add1', 'For::Test#xyz=add2']
-	\@deprecated       # --> ['For::Test#=for_test', 'For::Test#abc=']
+	\@remarks         # --> ['For::Test#=The package for testing', 'For::Test#abc=Is property\n  readonly']
+	\@todo            # --> ['For::Test#abc=add1', 'For::Test#xyz=add2']
+	\@deprecated      # --> ['For::Test#=for_test', 'For::Test#abc=']
 
 =head1 DESCRIPTION
 
@@ -256,8 +254,8 @@ Yaroslav O. Kosmina L<mailto:dart@cpan.org>
 
 =head1 LICENSE
 
-⚖ I<* gplv3 *>
+⚖ B<GPLv3>
 
 =head1 COPYRIGHT
 
-The Aion :: annotation module is copyright © 2025 Yaroslav O. Kosmina. Rusland. All Rights Reserved.
+The Aion::Annotation module is copyright © 2025 Yaroslav O. Kosmina. Rusland. All Rights Reserved.

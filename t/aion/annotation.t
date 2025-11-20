@@ -37,13 +37,11 @@ open my $f, '<', 'etc/annotation/remarks.ini' or die $!; my @remarks = <$f>; cho
 open my $f, '<', 'etc/annotation/todo.ann' or die $!; my @todo = <$f>; chop for @todo; close $f;
 open my $f, '<', 'etc/annotation/deprecated.ann' or die $!; my @deprecated = <$f>; chop for @deprecated; close $f;
 
-use DDP; p @modules_mtime;
-
 ::is scalar do {0+@modules_mtime}, scalar do{1}, '0+@modules_mtime  # -> 1';
 ::like scalar do {$modules_mtime[0]}, qr{^For::Test=\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d$}, '$modules_mtime[0] # ~> ^For::Test=\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d$';
-::is_deeply scalar do {\@remarks}, scalar do {['For::Test#=The package for testing', 'For::Test#abc=Is property\n  readonly']}, '\@remarks          # --> [\'For::Test#=The package for testing\', \'For::Test#abc=Is property\n  readonly\']';
-::is_deeply scalar do {\@todo}, scalar do {['For::Test#abc=add1', 'For::Test#xyz=add2']}, '\@todo             # --> [\'For::Test#abc=add1\', \'For::Test#xyz=add2\']';
-::is_deeply scalar do {\@deprecated}, scalar do {['For::Test#=for_test', 'For::Test#abc=']}, '\@deprecated       # --> [\'For::Test#=for_test\', \'For::Test#abc=\']';
+::is_deeply scalar do {\@remarks}, scalar do {['For::Test#=The package for testing', 'For::Test#abc=Is property\n  readonly']}, '\@remarks         # --> [\'For::Test#=The package for testing\', \'For::Test#abc=Is property\n  readonly\']';
+::is_deeply scalar do {\@todo}, scalar do {['For::Test#abc=add1', 'For::Test#xyz=add2']}, '\@todo            # --> [\'For::Test#abc=add1\', \'For::Test#xyz=add2\']';
+::is_deeply scalar do {\@deprecated}, scalar do {['For::Test#=for_test', 'For::Test#abc=']}, '\@deprecated      # --> [\'For::Test#=for_test\', \'For::Test#abc=\']';
 
 # 
 # # DESCRIPTION

@@ -1,3 +1,4 @@
+[![Actions Status](https://github.com/darviarush/perl-aion-annotation/actions/workflows/test.yml/badge.svg)](https://github.com/darviarush/perl-aion-annotation/actions) [![MetaCPAN Release](https://badge.fury.io/pl/Aion-Annotation.svg)](https://metacpan.org/release/Aion-Annotation) [![Coverage](https://raw.githubusercontent.com/darviarush/perl-aion-annotation/master/doc/badges/total.svg)](https://fast2-matrix.cpantesters.org/?dist=Aion-Annotation+0.0.0-prealpha)
 # NAME
 
 Aion::Annotation - обрабатывает аннотации в модулях perl
@@ -36,13 +37,11 @@ open my $f, '<', 'etc/annotation/remarks.ini' or die $!; my @remarks = <$f>; cho
 open my $f, '<', 'etc/annotation/todo.ann' or die $!; my @todo = <$f>; chop for @todo; close $f;
 open my $f, '<', 'etc/annotation/deprecated.ann' or die $!; my @deprecated = <$f>; chop for @deprecated; close $f;
 
-use DDP; p @modules_mtime;
-
 0+@modules_mtime  # -> 1
 $modules_mtime[0] # ~> ^For::Test=\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d$
-\@remarks          # --> ['For::Test#=The package for testing', 'For::Test#abc=Is property\n  readonly']
-\@todo             # --> ['For::Test#abc=add1', 'For::Test#xyz=add2']
-\@deprecated       # --> ['For::Test#=for_test', 'For::Test#abc=']
+\@remarks         # --> ['For::Test#=The package for testing', 'For::Test#abc=Is property\n  readonly']
+\@todo            # --> ['For::Test#abc=add1', 'For::Test#xyz=add2']
+\@deprecated      # --> ['For::Test#=for_test', 'For::Test#abc=']
 ```
 
 # DESCRIPTION
