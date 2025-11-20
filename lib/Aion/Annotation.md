@@ -1,4 +1,4 @@
-!ru:en
+!ru:en,badges
 # NAME
 
 Aion::Annotation - обрабатывает аннотации в модулях perl
