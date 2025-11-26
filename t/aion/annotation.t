@@ -5,7 +5,7 @@ use common::sense; use open qw/:std :utf8/;  use Carp qw//; use Cwd qw//; use Fi
 # 
 # # VERSION
 # 
-# 0.0.0-prealpha
+# 0.0.2-prealpha
 # 
 # # SYNOPSIS
 # 
@@ -22,6 +22,8 @@ use common::sense; use open qw/:std :utf8/;  use Carp qw//; use Cwd qw//; use Fi
 #>> has abc => (is => 'ro');
 #>> 
 #>> #@todo add2
+#>> #@param Int $a
+#>> #@param Int[] $r
 #>> sub xyz {}
 #>> 
 #>> 1;
@@ -36,12 +38,14 @@ open my $f, '<', 'etc/annotation/modules.mtime.ini' or die $!; my @modules_mtime
 open my $f, '<', 'etc/annotation/remarks.ini' or die $!; my @remarks = <$f>; chop for @remarks; close $f;
 open my $f, '<', 'etc/annotation/todo.ann' or die $!; my @todo = <$f>; chop for @todo; close $f;
 open my $f, '<', 'etc/annotation/deprecated.ann' or die $!; my @deprecated = <$f>; chop for @deprecated; close $f;
+open my $f, '<', 'etc/annotation/param.ann' or die $!; my @param = <$f>; chop for @param; close $f;
 
 ::is scalar do {0+@modules_mtime}, scalar do{1}, '0+@modules_mtime  # -> 1';
 ::like scalar do {$modules_mtime[0]}, qr{^For::Test=\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d$}, '$modules_mtime[0] # ~> ^For::Test=\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d$';
 ::is_deeply scalar do {\@remarks}, scalar do {['For::Test#=The package for testing', 'For::Test#abc=Is property\n  readonly']}, '\@remarks         # --> [\'For::Test#=The package for testing\', \'For::Test#abc=Is property\n  readonly\']';
 ::is_deeply scalar do {\@todo}, scalar do {['For::Test#abc=add1', 'For::Test#xyz=add2']}, '\@todo            # --> [\'For::Test#abc=add1\', \'For::Test#xyz=add2\']';
 ::is_deeply scalar do {\@deprecated}, scalar do {['For::Test#=for_test', 'For::Test#abc=']}, '\@deprecated      # --> [\'For::Test#=for_test\', \'For::Test#abc=\']';
+::is_deeply scalar do {\@param}, scalar do {['For::Test#xyz=Int $a', 'For::Test#xyz=Int[] $r']}, '\@param           # --> [\'For::Test#xyz=Int $a\', \'For::Test#xyz=Int[] $r\']';
 
 # 
 # # DESCRIPTION

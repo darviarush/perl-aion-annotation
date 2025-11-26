@@ -22,6 +22,8 @@ package For::Test;
 has abc => (is => 'ro');
 
 #@todo add2
+#@param Int $a
+#@param Int[] $r
 sub xyz {}
 
 1;
@@ -36,12 +38,14 @@ open my $f, '<', 'etc/annotation/modules.mtime.ini' or die $!; my @modules_mtime
 open my $f, '<', 'etc/annotation/remarks.ini' or die $!; my @remarks = <$f>; chop for @remarks; close $f;
 open my $f, '<', 'etc/annotation/todo.ann' or die $!; my @todo = <$f>; chop for @todo; close $f;
 open my $f, '<', 'etc/annotation/deprecated.ann' or die $!; my @deprecated = <$f>; chop for @deprecated; close $f;
+open my $f, '<', 'etc/annotation/param.ann' or die $!; my @param = <$f>; chop for @param; close $f;
 
 0+@modules_mtime  # -> 1
 $modules_mtime[0] # ~> ^For::Test=\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d$
 \@remarks         # --> ['For::Test#=The package for testing', 'For::Test#abc=Is property\n  readonly']
 \@todo            # --> ['For::Test#abc=add1', 'For::Test#xyz=add2']
 \@deprecated      # --> ['For::Test#=for_test', 'For::Test#abc=']
+\@param           # --> ['For::Test#xyz=Int $a', 'For::Test#xyz=Int[] $r']
 ```
 
 # DESCRIPTION
