@@ -2,6 +2,11 @@ Revision history for Perl extension Aion::Annotation
 
 {{$NEXT}}
 
+0.0.3 2025-12-03T18:04:42Z
+
+    - added linenos
+    - patch cpanfile
+
 0.0.2 2025-11-20T14:40:03Z
 
     - add unsupported os

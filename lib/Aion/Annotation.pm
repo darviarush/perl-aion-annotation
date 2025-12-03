@@ -3,7 +3,7 @@ use 5.22.0;
 no strict; no warnings; no diagnostics;
 use common::sense;
 
-our $VERSION = "0.0.2";
+our $VERSION = "0.0.3";
 
 # Дефолтный путь для сканирования
 use config LIB => ['lib'];
@@ -220,7 +220,7 @@ Aion::Annotation - processes annotations in perl modules
 
 =head1 VERSION
 
-0.0.2-prealpha
+0.0.3
 
 =head1 SYNOPSIS
 
