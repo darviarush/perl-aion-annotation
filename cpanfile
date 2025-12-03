@@ -27,6 +27,7 @@ on 'test' => sub {
 
 requires 'Aion';
 requires 'Aion::Carp';
+requires 'Aion::Run';
 requires 'Aion::Fs', '0.2.0';
 requires 'POSIX';
 requires 'Time::Local';
