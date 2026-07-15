@@ -2,7 +2,7 @@ package Aion::Annotation;
 
 use common::sense;
 
-our $VERSION = "0.0.3";
+our $VERSION = "0.1.0";
 
 use aliased 'Aion::Annotation::ScannedEvent';
 use Aion::Fs qw/find erase mkpath path mtime from_pkg to_pkg/;
@@ -233,7 +233,7 @@ Aion::Annotation - processes annotations in perl modules
 
 =head1 VERSION
 
-0.0.3
+0.1.0
 
 =head1 SYNOPSIS
 

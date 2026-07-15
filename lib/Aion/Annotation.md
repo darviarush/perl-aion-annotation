@@ -5,7 +5,7 @@ Aion::Annotation - обрабатывает аннотации в модулях
 
 # VERSION
 
-0.0.3
+0.1.0
 
 # SYNOPSIS
 
