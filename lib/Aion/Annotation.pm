@@ -2,7 +2,7 @@ package Aion::Annotation;
 
 use common::sense;
 
-our $VERSION = "0.1.0";
+our $VERSION = "0.2.0";
 
 use aliased 'Aion::Annotation::ScannedEvent';
 use aliased 'Aion::Annotation::Reader';
@@ -226,7 +226,7 @@ Aion::Annotation - processes annotations in perl modules
 
 =head1 VERSION
 
-0.1.0
+0.2.0
 
 =head1 SYNOPSIS
 
