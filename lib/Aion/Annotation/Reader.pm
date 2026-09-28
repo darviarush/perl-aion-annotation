@@ -176,13 +176,16 @@ File var/cache/modules.mtime.ini:
 		{pkg => 'For::Test', name => 'abc', line => '9', remark => "Is property\n  readonly"},
 	];
 	
-	\@{$reader_remarks} # --> $remarks
+	\@$reader_remarks # --> $remarks
 	
 	my $reader_mtime = Aion::Annotation::Reader->new(Aion::Annotation::Reader::READ_MTIME);
+	my @mtime = @$reader_mtime;
 	
 	my $mtime = [{pkg => 'For::Test', mtime => 1735776245}];
 	
-	\@{$reader_mtime} # --> $mtime
+	scalar @mtime # -> 1
+	$mtime[0]{pkg} # -> $mtime->[0]{pkg}
+	$mtime[0]{mtime} > 0 # -> 1
 
 =head1 DESCRIPTION
 
