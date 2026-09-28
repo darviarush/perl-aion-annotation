@@ -112,8 +112,8 @@ msgstr "Recognizes the annotation string. Returns a hash with the keys `pkg`, `n
 msgid "Распознаёт строку комментария. Экранированные последовательности `\\n` превращаются в переводы строк, а `\\<символ>` – в сам символ:"
 msgstr "Recognizes a comment line. Escaped sequences `\\n` are turned into newlines, and `\\<character>` into the character itself:"
 
-msgid "Распознаёт строку времени обновления. Поле `mtime` – это unixtime:"
-msgstr "Recognizes the update time string. The `mtime` field is unixtime:"
+msgid "Распознаёт строку времени обновления. Поле `mtime` — это unixtime (в локальном часовом поясе):"
+msgstr "Recognizes the update time string. The `mtime` field is unixtime (in the local time zone):"
 
 msgid "Если строка не соответствует формату, выдаётся предупреждение (`warn`), а элемент всё равно возвращается – с неопределёнными полями. Это позволяет не прерывать чтение на повреждённом файле:"
 msgstr "If the string does not match the format, a `warn` is issued, but the element is still returned - with undefined fields. This allows you not to interrupt reading on a damaged file:"

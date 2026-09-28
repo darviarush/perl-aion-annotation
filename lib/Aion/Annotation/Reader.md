@@ -28,6 +28,7 @@ For::Test=2025-01-02 03:04:05
 
 ```perl
 use Aion::Annotation::Reader;
+use Time::Local qw/timelocal/;
 
 my $reader = Aion::Annotation::Reader->new('todo');
 
@@ -47,13 +48,14 @@ my $remarks = [
 	{pkg => 'For::Test', name => 'abc', line => '9', remark => "Is property\n  readonly"},
 ];
 
-\@$reader_remarks # --> $remarks
+\@{$reader_remarks} # --> $remarks
 
 my $reader_mtime = Aion::Annotation::Reader->new(Aion::Annotation::Reader::READ_MTIME);
 
-my $mtime = [{pkg => 'For::Test', mtime => 1735776245}];
+# Время хранится как unixtime, поэтому ожидаемое значение не зависит от часового пояса
+my $mtime = [{pkg => 'For::Test', mtime => timelocal(5, 4, 3, 2, 0, 2025)}];
 
-\@$reader_mtime # --> $mtime
+\@{$reader_mtime} # --> $mtime
 ```
 
 # DESCRIPTION
@@ -297,11 +299,13 @@ Aion::Annotation::Reader::detect_remark($reader, "For::Test#abc,9=Is property\\n
 
 ## detect_mtime ($self, $line)
 
-Распознаёт строку времени обновления. Поле `mtime` – это unixtime:
+Распознаёт строку времени обновления. Поле `mtime` — это unixtime (в локальном часовом поясе):
 
 ```perl
+use Time::Local qw/timelocal/;
+
 my $test = {
-	pkg => 'For::Test', mtime => 1735776245
+	pkg => 'For::Test', mtime => timelocal(5, 4, 3, 2, 0, 2025)
 };
 
 my $reader = Aion::Annotation::Reader->new('todo');

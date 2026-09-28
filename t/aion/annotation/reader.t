@@ -28,6 +28,7 @@ use common::sense; use open qw/:std :utf8/;  use Carp qw//; use Cwd qw//; use Fi
 # 
 subtest 'SYNOPSIS' => sub { 
 use Aion::Annotation::Reader;
+use Time::Local qw/timelocal/;
 
 my $reader = Aion::Annotation::Reader->new('todo');
 
@@ -47,13 +48,14 @@ my $remarks = [
 	{pkg => 'For::Test', name => 'abc', line => '9', remark => "Is property\n  readonly"},
 ];
 
-local ($::_g0 = do {\@$reader_remarks}, $::_e0 = do {$remarks}); ::is_deeply $::_g0, $::_e0, '\@$reader_remarks # --> $remarks' or ::diag ::_struct_diff($::_g0, $::_e0); undef $::_g0; undef $::_e0;
+local ($::_g0 = do {\@{$reader_remarks}}, $::_e0 = do {$remarks}); ::is_deeply $::_g0, $::_e0, '\@{$reader_remarks} # --> $remarks' or ::diag ::_struct_diff($::_g0, $::_e0); undef $::_g0; undef $::_e0;
 
 my $reader_mtime = Aion::Annotation::Reader->new(Aion::Annotation::Reader::READ_MTIME);
 
-my $mtime = [{pkg => 'For::Test', mtime => 1735776245}];
+# Время хранится как unixtime, поэтому ожидаемое значение не зависит от часового пояса
+my $mtime = [{pkg => 'For::Test', mtime => timelocal(5, 4, 3, 2, 0, 2025)}];
 
-local ($::_g0 = do {\@$reader_mtime}, $::_e0 = do {$mtime}); ::is_deeply $::_g0, $::_e0, '\@$reader_mtime # --> $mtime' or ::diag ::_struct_diff($::_g0, $::_e0); undef $::_g0; undef $::_e0;
+local ($::_g0 = do {\@{$reader_mtime}}, $::_e0 = do {$mtime}); ::is_deeply $::_g0, $::_e0, '\@{$reader_mtime} # --> $mtime' or ::diag ::_struct_diff($::_g0, $::_e0); undef $::_g0; undef $::_e0;
 
 # 
 # # DESCRIPTION
@@ -297,11 +299,13 @@ local ($::_g0 = do {Aion::Annotation::Reader::detect_remark($reader, "For::Test#
 # 
 # ## detect_mtime ($self, $line)
 # 
-# Распознаёт строку времени обновления. Поле `mtime` – это unixtime:
+# Распознаёт строку времени обновления. Поле `mtime` — это unixtime (в локальном часовом поясе):
 # 
 ::done_testing; }; subtest 'detect_mtime ($self, $line)' => sub { 
+use Time::Local qw/timelocal/;
+
 my $test = {
-	pkg => 'For::Test', mtime => 1735776245
+	pkg => 'For::Test', mtime => timelocal(5, 4, 3, 2, 0, 2025)
 };
 
 my $reader = Aion::Annotation::Reader->new('todo');

@@ -157,6 +157,7 @@ File var/cache/modules.mtime.ini:
 
 
 	use Aion::Annotation::Reader;
+	use Time::Local qw/timelocal/;
 	
 	my $reader = Aion::Annotation::Reader->new('todo');
 	
@@ -176,13 +177,14 @@ File var/cache/modules.mtime.ini:
 		{pkg => 'For::Test', name => 'abc', line => '9', remark => "Is property\n  readonly"},
 	];
 	
-	\@$reader_remarks # --> $remarks
+	\@{$reader_remarks} # --> $remarks
 	
 	my $reader_mtime = Aion::Annotation::Reader->new(Aion::Annotation::Reader::READ_MTIME);
 	
-	my $mtime = [{pkg => 'For::Test', mtime => 1735776245}];
+	# Время хранится как unixtime, поэтому ожидаемое значение не зависит от часового пояса
+	my $mtime = [{pkg => 'For::Test', mtime => timelocal(5, 4, 3, 2, 0, 2025)}];
 	
-	\@$reader_mtime # --> $mtime
+	\@{$reader_mtime} # --> $mtime
 
 =head1 DESCRIPTION
 
@@ -397,10 +399,12 @@ Recognizes a comment line. Escaped sequences C<\n> are turned into newlines, and
 
 =head2 detect_mtime ($self, $line)
 
-Recognizes the update time string. The C<mtime> field is unixtime:
+Recognizes the update time string. The C<mtime> field is unixtime (in the local time zone):
 
+	use Time::Local qw/timelocal/;
+	
 	my $test = {
-		pkg => 'For::Test', mtime => 1735776245
+		pkg => 'For::Test', mtime => timelocal(5, 4, 3, 2, 0, 2025)
 	};
 	
 	my $reader = Aion::Annotation::Reader->new('todo');
