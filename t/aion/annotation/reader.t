@@ -50,13 +50,10 @@ my $remarks = [
 local ($::_g0 = do {\@$reader_remarks}, $::_e0 = do {$remarks}); ::is_deeply $::_g0, $::_e0, '\@$reader_remarks # --> $remarks' or ::diag ::_struct_diff($::_g0, $::_e0); undef $::_g0; undef $::_e0;
 
 my $reader_mtime = Aion::Annotation::Reader->new(Aion::Annotation::Reader::READ_MTIME);
-my @mtime = @$reader_mtime;
 
 my $mtime = [{pkg => 'For::Test', mtime => 1735776245}];
 
-local ($::_g0 = do {scalar @mtime}, $::_e0 = do {1}); ::ok defined($::_g0) == defined($::_e0) && $::_g0 eq $::_e0, 'scalar @mtime # -> 1' or ::diag ::_struct_diff($::_g0, $::_e0); undef $::_g0; undef $::_e0;
-local ($::_g0 = do {$mtime[0]{pkg}}, $::_e0 = do {$mtime->[0]{pkg}}); ::ok defined($::_g0) == defined($::_e0) && $::_g0 eq $::_e0, '$mtime[0]{pkg} # -> $mtime->[0]{pkg}' or ::diag ::_struct_diff($::_g0, $::_e0); undef $::_g0; undef $::_e0;
-local ($::_g0 = do {$mtime[0]{mtime} > 0}, $::_e0 = do {1}); ::ok defined($::_g0) == defined($::_e0) && $::_g0 eq $::_e0, '$mtime[0]{mtime} > 0 # -> 1' or ::diag ::_struct_diff($::_g0, $::_e0); undef $::_g0; undef $::_e0;
+local ($::_g0 = do {\@$reader_mtime}, $::_e0 = do {$mtime}); ::is_deeply $::_g0, $::_e0, '\@$reader_mtime # --> $mtime' or ::diag ::_struct_diff($::_g0, $::_e0); undef $::_g0; undef $::_e0;
 
 # 
 # # DESCRIPTION
@@ -308,7 +305,7 @@ my $test = {
 };
 
 my $reader = Aion::Annotation::Reader->new('todo');
-local ($::_g0 = do {Aion::Annotation::Reader::detect_mtime($reader, "For::Test=2025-01-02 03:04:05\n")->{pkg}}, $::_e0 = do {$test->{pkg}}); ::ok defined($::_g0) == defined($::_e0) && $::_g0 eq $::_e0, 'Aion::Annotation::Reader::detect_mtime($reader, "For::Test=2025-01-02 03:04:05\n")->{pkg} # -> $test->{pkg}' or ::diag ::_struct_diff($::_g0, $::_e0); undef $::_g0; undef $::_e0;
+local ($::_g0 = do {Aion::Annotation::Reader::detect_mtime($reader, "For::Test=2025-01-02 03:04:05\n")}, $::_e0 = do {$test}); ::is_deeply $::_g0, $::_e0, 'Aion::Annotation::Reader::detect_mtime($reader, "For::Test=2025-01-02 03:04:05\n") # --> $test' or ::diag ::_struct_diff($::_g0, $::_e0); undef $::_g0; undef $::_e0;
 
 # 
 # # CORRUPT LINES

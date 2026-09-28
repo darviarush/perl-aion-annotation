@@ -50,13 +50,10 @@ my $remarks = [
 \@$reader_remarks # --> $remarks
 
 my $reader_mtime = Aion::Annotation::Reader->new(Aion::Annotation::Reader::READ_MTIME);
-my @mtime = @$reader_mtime;
 
 my $mtime = [{pkg => 'For::Test', mtime => 1735776245}];
 
-scalar @mtime # -> 1
-$mtime[0]{pkg} # -> $mtime->[0]{pkg}
-$mtime[0]{mtime} > 0 # -> 1
+\@$reader_mtime # --> $mtime
 ```
 
 # DESCRIPTION
@@ -308,7 +305,7 @@ my $test = {
 };
 
 my $reader = Aion::Annotation::Reader->new('todo');
-Aion::Annotation::Reader::detect_mtime($reader, "For::Test=2025-01-02 03:04:05\n")->{pkg} # -> $test->{pkg}
+Aion::Annotation::Reader::detect_mtime($reader, "For::Test=2025-01-02 03:04:05\n") # --> $test
 ```
 
 # CORRUPT LINES
