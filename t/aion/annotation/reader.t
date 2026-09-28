@@ -83,22 +83,22 @@ local ($::_g0 = do {$mtime[0]{mtime} > 0}, $::_e0 = do {1}); ::ok defined($::_g0
 # 
 # `Aion::Annotation::Reader` перегружает операции:
 # 
-# ## `<>`
+# ## <>
 # 
 # Вызов читателя.
 # 
-::done_testing; }; subtest '`<>`' => sub { 
+::done_testing; }; subtest '<>' => sub { 
 my $reader = Aion::Annotation::Reader->new('todo');
 
 my @ann; push @ann, $_ while <$reader>;
 local ($::_g0 = do {0+@ann}, $::_e0 = do {2}); ::ok defined($::_g0) == defined($::_e0) && $::_g0 eq $::_e0, '0+@ann  # -> 2' or ::diag ::_struct_diff($::_g0, $::_e0); undef $::_g0; undef $::_e0;
 
 # 
-# ## `@{}`
+# ## @{}
 # 
 # Список всех элементов.
 # 
-::done_testing; }; subtest '`@{}`' => sub { 
+::done_testing; }; subtest '@{}' => sub { 
 my $reader = Aion::Annotation::Reader->new('todo');
 
 my $ann = [
@@ -109,13 +109,13 @@ my $ann = [
 local ($::_g0 = do {\@{$reader}}, $::_e0 = do {$ann}); ::is_deeply $::_g0, $::_e0, '\@{$reader} # --> $ann' or ::diag ::_struct_diff($::_g0, $::_e0); undef $::_g0; undef $::_e0;
 
 # 
-# ## `&{}`
+# ## &{}
 # 
 # Вызов как функции.
 # 
 # Каждое обращение возвращает следующий элемент или `undef` в конце:
 # 
-::done_testing; }; subtest '`&{}`' => sub { 
+::done_testing; }; subtest '&{}' => sub { 
 my $reader = Aion::Annotation::Reader->new('todo');
 
 local ($::_g0 = do {&$reader}, $::_e0 = do {{pkg => 'For::Test', name => 'abc', line => '5', annotation => 'add1'}}); ::is_deeply $::_g0, $::_e0, '&$reader # --> {pkg => \'For::Test\', name => \'abc\', line => \'5\', annotation => \'add1\'}' or ::diag ::_struct_diff($::_g0, $::_e0); undef $::_g0; undef $::_e0;
@@ -123,34 +123,34 @@ local ($::_g0 = do {&$reader}, $::_e0 = do {{pkg => 'For::Test', name => 'xyz', 
 local ($::_g0 = do {&$reader}, $::_e0 = do {undef}); ::ok defined($::_g0) == defined($::_e0) && $::_g0 eq $::_e0, '&$reader # -> undef' or ::diag ::_struct_diff($::_g0, $::_e0); undef $::_g0; undef $::_e0;
 
 # 
-# ## `*{}`
+# ## *{}
 # 
 # Файловый дескриптор.
 # 
-::done_testing; }; subtest '`*{}`' => sub { 
+::done_testing; }; subtest '*{}' => sub { 
 my $reader = Aion::Annotation::Reader->new('todo');
 my $fh = *$reader;
 ::like scalar do {readline $fh}, qr{^For::Test#abc,5=add1$}, 'readline $fh  # ~> ^For::Test#abc,5=add1$'; undef $::_g0; undef $::_e0;
 
 # 
-# ## `-X`
+# ## -X
 # 
 # Файловые операции.
 # 
 # Операции вида `-e`, `-s`, `-f` выполняются над файлом читателя. Результат операции кешируется:
 # 
-::done_testing; }; subtest '`-X`' => sub { 
+::done_testing; }; subtest '-X' => sub { 
 my $reader = Aion::Annotation::Reader->new('todo');
 local ($::_g0 = do {-e $reader}, $::_e0 = do {1}); ::ok defined($::_g0) == defined($::_e0) && $::_g0 eq $::_e0, '-e $reader # -> 1' or ::diag ::_struct_diff($::_g0, $::_e0); undef $::_g0; undef $::_e0;
 local ($::_g0 = do {-s $reader}, $::_e0 = do {43}); ::ok defined($::_g0) == defined($::_e0) && $::_g0 eq $::_e0, '-s $reader # -> 43' or ::diag ::_struct_diff($::_g0, $::_e0); undef $::_g0; undef $::_e0;
 local ($::_g0 = do {-f $reader}, $::_e0 = do {1}); ::ok defined($::_g0) == defined($::_e0) && $::_g0 eq $::_e0, '-f $reader # -> 1' or ::diag ::_struct_diff($::_g0, $::_e0); undef $::_g0; undef $::_e0;
 
 # 
-# ## `""`
+# ## ""
 # 
 # Строковое представление.
 # 
-::done_testing; }; subtest '`""`' => sub { 
+::done_testing; }; subtest '""' => sub { 
 my $reader = Aion::Annotation::Reader->new('todo');
 local ($::_g0 = do {"$reader"}, $::_e0 = "Aion::Annotation::Reader<ann,etc/annotation/todo.ann>"); ::ok $::_g0 eq $::_e0, '"$reader" # => Aion::Annotation::Reader<ann,etc/annotation/todo.ann>' or ::diag ::_string_diff($::_g0, $::_e0); undef $::_g0; undef $::_e0;
 

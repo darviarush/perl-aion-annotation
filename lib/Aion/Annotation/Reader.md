@@ -83,7 +83,7 @@ $mtime[0]{mtime} > 0 # -> 1
 
 `Aion::Annotation::Reader` перегружает операции:
 
-## `<>`
+## <>
 
 Вызов читателя.
 
@@ -94,7 +94,7 @@ my @ann; push @ann, $_ while <$reader>;
 0+@ann  # -> 2
 ```
 
-## `@{}`
+## @{}
 
 Список всех элементов.
 
@@ -109,7 +109,7 @@ my $ann = [
 \@{$reader} # --> $ann
 ```
 
-## `&{}`
+## &{}
 
 Вызов как функции.
 
@@ -123,7 +123,7 @@ my $reader = Aion::Annotation::Reader->new('todo');
 &$reader # -> undef
 ```
 
-## `*{}`
+## *{}
 
 Файловый дескриптор.
 
@@ -133,7 +133,7 @@ my $fh = *$reader;
 readline $fh  # ~> ^For::Test#abc,5=add1$
 ```
 
-## `-X`
+## -X
 
 Файловые операции.
 
@@ -146,7 +146,7 @@ my $reader = Aion::Annotation::Reader->new('todo');
 -f $reader # -> 1
 ```
 
-## `""`
+## ""
 
 Строковое представление.
 

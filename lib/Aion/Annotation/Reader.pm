@@ -223,7 +223,7 @@ Directories are configured by the environment variables C<AION_ANNOTATION_INI> (
 
 C<Aion::Annotation::Reader> overloads the operations:
 
-=head2 C<< E<lt>E<gt> >>
+=head2 <>
 
 The reader's challenge.
 
@@ -232,7 +232,7 @@ The reader's challenge.
 	my @ann; push @ann, $_ while <$reader>;
 	0+@ann  # -> 2
 
-=head2 C<@{}>
+=head2 @{}
 
 List of all elements.
 
@@ -245,7 +245,7 @@ List of all elements.
 	
 	\@{$reader} # --> $ann
 
-=head2 C<&{}>
+=head2 &{}
 
 Call as functions.
 
@@ -257,7 +257,7 @@ Each call returns the following element or C<undef> at the end:
 	&$reader # --> {pkg => 'For::Test', name => 'xyz', line => '11', annotation => 'add2'}
 	&$reader # -> undef
 
-=head2 C<*{}>
+=head2 *{}
 
 File descriptor.
 
@@ -265,7 +265,7 @@ File descriptor.
 	my $fh = *$reader;
 	readline $fh  # ~> ^For::Test#abc,5=add1$
 
-=head2 C<-X>
+=head2 -X
 
 File operations.
 
@@ -276,7 +276,7 @@ Operations like C<-e>, C<-s>, C<-f> are performed on the reader file. The result
 	-s $reader # -> 43
 	-f $reader # -> 1
 
-=head2 C<"">
+=head2 ""
 
 String representation.
 
