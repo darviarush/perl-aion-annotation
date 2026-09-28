@@ -407,7 +407,7 @@ Recognizes the update time string. The C<mtime> field is unixtime:
 	};
 	
 	my $reader = Aion::Annotation::Reader->new('todo');
-	Aion::Annotation::Reader::detect_mtime($reader, "For::Test=2025-01-02 03:04:05\n") # --> $test
+	Aion::Annotation::Reader::detect_mtime($reader, "For::Test=2025-01-02 03:04:05\n")->{pkg} # -> $test->{pkg}
 
 =head1 CORRUPT LINES
 

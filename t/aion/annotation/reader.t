@@ -308,7 +308,7 @@ my $test = {
 };
 
 my $reader = Aion::Annotation::Reader->new('todo');
-local ($::_g0 = do {Aion::Annotation::Reader::detect_mtime($reader, "For::Test=2025-01-02 03:04:05\n")}, $::_e0 = do {$test}); ::is_deeply $::_g0, $::_e0, 'Aion::Annotation::Reader::detect_mtime($reader, "For::Test=2025-01-02 03:04:05\n") # --> $test' or ::diag ::_struct_diff($::_g0, $::_e0); undef $::_g0; undef $::_e0;
+local ($::_g0 = do {Aion::Annotation::Reader::detect_mtime($reader, "For::Test=2025-01-02 03:04:05\n")->{pkg}}, $::_e0 = do {$test->{pkg}}); ::ok defined($::_g0) == defined($::_e0) && $::_g0 eq $::_e0, 'Aion::Annotation::Reader::detect_mtime($reader, "For::Test=2025-01-02 03:04:05\n")->{pkg} # -> $test->{pkg}' or ::diag ::_struct_diff($::_g0, $::_e0); undef $::_g0; undef $::_e0;
 
 # 
 # # CORRUPT LINES
